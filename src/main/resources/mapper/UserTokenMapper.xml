@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.perhome.document.mapper.UserTokenMapper">
+
+    <select id="findByToken" resultType="cn.perhome.document.model.UserToken" parameterType="java.lang.String">
+        SELECT t1.*
+        FROM "token" t1
+        <where>
+            t1.token = #{token}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="findAllValidTokenByUser" resultType="cn.perhome.document.model.UserToken">
+        SELECT t1.*
+        FROM "token" t1
+        <where>
+            t1.user_id = #{userId} AND  expired = false AND revoked = false
+        </where>
+    </select>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM "token" WHERE id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="cn.perhome.document.model.UserToken">
+        INSERT INTO "token" (user_id, token) VALUES (#{userId}, #{token})
+    </insert>
+
+    <update id="update" parameterType="cn.perhome.document.model.UserToken">
+        UPDATE "token"
+        <set>
+            <if test='tid!=null'>id=#{id},</if>
+            <if test='token!=null'>token=#{token},</if>
+            <if test='tokenType!=null'>token_type=#{tokenType},</if>
+            <if test='revoked!=null'>revoked=#{revoked},</if>
+            <if test='expired!=null'>expired=#{expired},</if>
+            <if test='userId!=null'>user_id=#{userId},</if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <update id="saveAll" parameterType="cn.perhome.document.model.UserToken">
+        UPDATE "token"
+            SET expired = true, revoked = true
+        WHERE id IN <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+</mapper>
